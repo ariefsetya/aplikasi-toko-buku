@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2017-08-15 09:28:26.000.192,=C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+    <Transaction>2017-08-15 09:28:33.000.963,=C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\Unit1.cpp</Transaction>
+    <Transaction>2017-08-15 09:29:52.000.328,C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\Unit1.cpp=C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\CPP\Unit1.cpp</Transaction>
+    <Transaction>2017-08-15 09:29:52.000.328,C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\Unit1.h=C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\CPP\Unit1.h</Transaction>
+    <Transaction>2017-08-15 09:29:52.000.328,C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\CPP\Unit1.dfm</Transaction>
+    <Transaction>2017-08-15 11:26:31.000.363,C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\Project1PCH1.h=C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\CPP\Project1PCH1.h</Transaction>
+    <Transaction>2017-08-15 11:26:32.000.661,C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\Project1.cbproj=C:\Users\AnonymousX\Documents\Embarcadero\Studio\Projects\CPP\Project1.cbproj</Transaction>
+  </Transactions>
+</BorlandProject>

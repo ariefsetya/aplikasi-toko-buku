@@ -1,0 +1,439 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "Unit1.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm1 *Form1;
+//---------------------------------------------------------------------------
+__fastcall TForm1::TForm1(TComponent* Owner)
+	: TForm(Owner)
+{
+
+adoc = new TADOConnection(this);
+adoq = new TADOQuery(this);
+p = new TPanel(this);
+	b = new TButton(this);
+
+try{
+	String Connection = "DRIVER={MYSQL ODBC 5.1 Driver};SERVER=localhost;UID=root;PWD=;DATABASE=toko;OPTION=3;";
+
+	adoc->ConnectionString = Connection;
+	adoc->LoginPrompt = false;
+	adoc->Connected = true;
+
+    adoq->Connection = adoc;
+}catch(Exception &e){
+    ShowMessage(e.Message);
+}
+}
+
+
+
+void __fastcall TForm1::renderInput(TObject *Sender, String label[],String type[],String value[],String field[],String field_text[],String field_id[],
+	String table_name,
+	int field_num,String button_name){
+	p = new TPanel(this);
+	p->Parent = Form1;
+	p->Left = 0;
+	p->Top = 0;
+	p->Height = Form1->ClientHeight;
+	p->Width = Form1->ClientWidth;
+	p->Show();
+
+	for(int i=0;i<field_num;i++){
+
+		l[i] = new TLabel(this);
+		l[i]->Parent = p;
+		l[i]->Left = 10;
+		l[i]->Top = 25*(i+1);
+		l[i]->Caption = label[i];
+		l[i]->Show();
+
+		if(type[i]=="input"){
+
+		e[i] = new TEdit(this);
+		e[i]->Parent = p;
+		e[i]->Left = 100;
+		e[i]->Top = 25*(i+1);
+		e[i]->Show();
+		}else if(type[i]=="select"){
+		cb[i] = new TComboBox(this);
+		cb[i]->Parent = p;
+		cb[i]->Left = 100;
+		cb[i]->Top = 25*(i+1);
+		cb[i]->Show();
+		cb[i]->Items->Clear();
+
+		adoq->Close();
+		adoq->SQL->Text = "SELECT * FROM "+value[i];
+		adoq->Open();
+		adoq->First();
+		int x = 0;
+		while(!adoq->Eof){
+			cb[i]->Items->Add(adoq->FieldByName(field_text[i])->AsString);
+			combo_val[i][x] = adoq->FieldByName(field_id[i])->AsString;
+			x++;
+            adoq->Next();
+		}
+
+		}
+
+
+	}
+
+    b->Name = "null";
+	b->Parent = p;
+	b->Caption = "Simpan";
+	b->Name = button_name;
+	b->Left = 10;
+	b->Top = 25*(field_num+1);
+	b->OnClick = &btnClick;
+
+
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::ambahData1Click(TObject *Sender)
+{
+String field[] = {"nama_distributor","alamat","telepon"};
+String label[] = {"Nama Distributor","Alamat","Telepon"};
+String type[] = {"input","input","input"};
+String value[] = {"","",""};
+String field_text[] = {"","",""};
+String field_id[] = {"","",""};
+String table_name = "distributor";
+int field_num = sizeof(field)/sizeof(field[0]);
+String button_name = "simpan_data_distributor";
+
+renderInput(Sender,label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+
+void __fastcall TForm1::btnClick(TObject *Sender){
+	TButton *b = dynamic_cast<TButton *>(Sender);
+	if(b->Name == "simpan_data_distributor"){
+    	String field[] = {"nama_distributor","alamat","telepon"};
+		String label[] = {"Nama Distributor","Alamat","Telepon"};
+		String type[] = {"input","input","input"};
+		String value[] = {"","",""};
+		String field_text[] = {"","",""};
+		String field_id[] = {"","",""};
+		String table_name = "distributor";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "simpan_data_distributor";
+		saveData(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+	}else if(b->Name == "hapus_data_distributor"){
+		String id = adoq->FieldByName("id_distributor")->AsAnsiString;
+		adoq->Close();
+		adoq->SQL->Text = "DELETE FROM distributor WHERE id_distributor = '"+id+"'";
+		adoq->ExecSQL();
+        String field[] = {"nama_distributor","alamat","telepon"};
+		String label[] = {"Nama Distributor","Alamat","Telepon"};
+		String type[] = {"input","input","input"};
+		String value[] = {"","",""};
+		String field_text[] = {"","",""};
+		String field_id[] = {"","",""};
+		String table_name = "distributor";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_distributor";
+        b->Name = "null";
+
+		showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+
+
+
+	}else if(b->Name == "simpan_data_buku"){
+String field[] = {"judul","noisbn","penulis","penerbit","tahun","stok","harga_pokok","harga_jual","ppn","diskon"};
+		String label[] = {"Judul","No ISBN","Penulis","Penerbit","Tahun","Stok","Harga Pokok","Harga Jual","PPN","Diskon"};
+		String type[] = {"input","input","input","input","input","input","input","input","input","input"};
+		String value[] = {"","","","","","","","","",""};
+		String field_text[] = {"","","","","","","","","",""};
+		String field_id[] = {"","","","","","","","","",""};
+		String table_name = "buku";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_buku";
+		saveData(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+	}else if(b->Name == "hapus_data_buku"){
+		String id = adoq->FieldByName("id_buku")->AsAnsiString;
+		adoq->Close();
+		adoq->SQL->Text = "DELETE FROM buku WHERE id_buku = '"+id+"'";
+		adoq->ExecSQL();
+String field[] = {"judul","noisbn","penulis","penerbit","tahun","stok","harga_pokok","harga_jual","ppn","diskon"};
+		String label[] = {"Judul","No ISBN","Penulis","Penerbit","Tahun","Stok","Harga Pokok","Harga Jual","PPN","Diskon"};
+		String type[] = {"input","input","input","input","input","input","input","input","input","input"};
+		String value[] = {"","","","","","","","","",""};
+		String field_text[] = {"","","","","","","","","",""};
+		String field_id[] = {"","","","","","","","","",""};
+		String table_name = "buku";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_buku";
+        b->Name = "null";
+
+		showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+
+
+
+	}else if(b->Name == "simpan_data_pembelian"){
+		String field[] = {"id_distributor","id_buku","jumlah","tanggal"};
+		String label[] = {"Distributor","Buku","Jumlah","Tanggal"};
+		String type[] = {"select","select","input","input"};
+		String value[] = {"distributor","buku","",""};
+		String field_text[] = {"nama_distributor","judul","",""};
+		String field_id[] = {"id_distributor","id_buku","",""};
+		String table_name = "pasok";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_pembelian";
+		saveData(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+	}else if(b->Name == "simpan_data_kasir"){
+		String field[] = {"nama","alamat","telepon","status","username","password","akses"};
+		String label[] = {"Nama","Alamat","Telepon","Status","Username","Password","Akses"};
+		String type[] = {"input","input","input","input","input","input","input"};
+		String value[] = {"","","","","","",""};
+		String field_text[] = {"","","","","","",""};
+		String field_id[] = {"","","","","","",""};
+		String table_name = "kasir";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_kasir";
+		saveData(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+	}else if(b->Name == "simpan_data_penjualan"){
+		String field[] = {"id_buku","id_kasir","jumlah","total","tanggal"};
+		String label[] = {"Buku","Kasir","Jumlah","Total","Tanggal"};
+		String type[] = {"select","select","input","input","input"};
+		String value[] = {"buku","kasir","","",""};
+		String field_text[] = {"judul","nama","","",""};
+		String field_id[] = {"id_buku","id_kasir","","",""};
+		String table_name = "penjualan";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_penjualan";
+		saveData(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+	}else if(b->Name == "hapus_data_kasir"){
+		String field[] = {"nama","alamat","telepon","status","username","password","akses"};
+		String label[] = {"Nama","Alamat","Telepon","Status","Username","Password","Akses"};
+		String type[] = {"input","input","input","input","input","input","input"};
+		String value[] = {"","","","","","",""};
+		String field_text[] = {"","","","","","",""};
+		String field_id[] = {"","","","","","",""};
+		String table_name = "kasir";
+		int field_num = sizeof(field)/sizeof(field[0]);
+        b->Name = "null";
+		String button_name = "hapus_data_kasir";
+
+		showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+	}
+}
+
+void __fastcall TForm1::saveData(String label[],String type[],String value[],String field[],String field_text[],String field_id[],
+	String table_name,
+	int field_num,String button_name){
+ String query = "INSERT INTO "+table_name+" (";
+
+ for(int i=0;i<field_num;i++){
+	query += "`"+field[i]+"`";
+	if(i!=field_num-1){
+		query += ",";
+	}
+	}
+
+	query += ") VALUES (";
+	for(int i=0;i<field_num;i++){
+	if(type[i]=="input"){
+		query += "'"+e[i]->Text+"'";
+	}else if(type[i]=="select"){
+		query += "'"+combo_val[i][cb[i]->ItemIndex]+"'";
+	}
+	if(i!=field_num-1){
+		query += ",";
+	}
+ }
+
+ query += ")";
+
+ adoq->Close();
+ adoq->SQL->Text = query;
+ adoq->ExecSQL();
+
+ ShowMessage("data tersimpan");
+
+ showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+
+
+}
+
+
+void __fastcall TForm1::showGrid(String label[],String type[],String value[],String field[],String field_text[],String field_id[],
+	String table_name,
+	int field_num,String button_name){
+
+	adoq->Close();
+	adoq->SQL->Text = "SELECT * FROM "+table_name;
+    adoq->Open();
+
+	ds = new TDataSource(this);
+	ds->DataSet = adoq;
+	p = new TPanel(this);
+	p->Parent = Form1;
+	p->Left = 0;
+	p->Top = 0;
+	p->Height = Form1->ClientHeight;
+	p->Width = Form1->ClientWidth;
+	p->Show();
+
+	 dbg = new TDBGrid(this);
+	 dbg->Parent = p;
+     dbg->DataSource = ds;
+	 dbg->Left = 10;
+	 dbg->Top = 10;
+	 dbg->Width = p->Width - 20;
+	 dbg->Height = p->Height - 50;
+
+
+    b->Name = "null";
+    b->Parent = p;
+	b->Caption = "Hapus";
+	b->Name = button_name;
+	b->Left = 10;
+	b->Top = dbg->Height+10;
+	b->OnClick = &btnClick;
+}
+
+
+//---------------------------------------------------------------------------
+void __fastcall TForm1::DataDistributor1Click(TObject *Sender)
+{
+String field[] = {"nama_distributor","alamat","telepon"};
+		String label[] = {"Nama Distributor","Alamat","Telepon"};
+		String type[] = {"input","input","input"};
+		String value[] = {"","",""};
+		String field_text[] = {"","",""};
+		String field_id[] = {"","",""};
+		String table_name = "distributor";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_distributor";
+
+        showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::DataBuku1Click(TObject *Sender)
+{
+
+String field[] = {"judul","noisbn","penulis","penerbit","tahun","stok","harga_pokok","harga_jual","ppn","diskon"};
+		String label[] = {"Judul","No ISBN","Penulis","Penerbit","Tahun","Stok","Harga Pokok","Harga Jual","PPN","Diskon"};
+		String type[] = {"input","input","input","input","input","input","input","input","input","input"};
+		String value[] = {"","","","","","","","","",""};
+		String field_text[] = {"","","","","","","","","",""};
+		String field_id[] = {"","","","","","","","","",""};
+		String table_name = "buku";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_buku";
+
+		showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::ambahBuku1Click(TObject *Sender)
+{
+
+ 		String field[] = {"judul","noisbn","penulis","penerbit","tahun","stok","harga_pokok","harga_jual","ppn","diskon"};
+		String label[] = {"Judul","No ISBN","Penulis","Penerbit","Tahun","Stok","Harga Pokok","Harga Jual","PPN","Diskon"};
+		String type[] = {"input","input","input","input","input","input","input","input","input","input"};
+		String value[] = {"","","","","","","","","",""};
+		String field_text[] = {"","","","","","","","","",""};
+		String field_id[] = {"","","","","","","","","",""};
+		String table_name = "buku";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "simpan_data_buku";
+
+		renderInput(Sender,label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::ambahData2Click(TObject *Sender)
+{
+String field[] = {"nama","alamat","telepon","status","username","password","akses"};
+String label[] = {"Nama","Alamat","Telepon","Status","Username","Password","Akses"};
+String type[] = {"input","input","input","input","input","input","input"};
+String value[] = {"","","","","","",""};
+String field_text[] = {"","","","","","",""};
+String field_id[] = {"","","","","","",""};
+String table_name = "kasir";
+int field_num = sizeof(field)/sizeof(field[0]);
+String button_name = "simpan_data_kasir";
+
+renderInput(Sender,label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::DataKasir1Click(TObject *Sender)
+{
+		String field[] = {"nama","alamat","telepon","status","username","password","akses"};
+		String label[] = {"Nama","Alamat","Telepon","Status","Username","Password","Akses"};
+		String type[] = {"input","input","input","input","input","input","input"};
+		String value[] = {"","","","","","",""};
+		String field_text[] = {"","","","","","",""};
+		String field_id[] = {"","","","","","",""};
+		String table_name = "kasir";
+		int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_kasir";
+
+		showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::BuatPembelianBaru1Click(TObject *Sender)
+{
+String field[] = {"id_distributor","id_buku","jumlah","tanggal"};
+String label[] = {"Distributor","Buku","Jumlah","Tanggal"};
+String type[] = {"select","select","input","input"};
+String value[] = {"distributor","buku","",""};
+String field_text[] = {"nama_distributor","judul","",""};
+String field_id[] = {"id_distributor","id_buku","",""};
+String table_name = "pasok";
+int field_num = sizeof(field)/sizeof(field[0]);
+String button_name = "simpan_data_pembelian";
+
+renderInput(Sender,label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::BuatPenjualanBaru1Click(TObject *Sender)
+{
+String field[] = {"id_buku","id_kasir","jumlah","total","tanggal"};
+String label[] = {"Buku","Kasir","Jumlah","Total","Tanggal"};
+String type[] = {"select","select","input","input","input"};
+String value[] = {"buku","kasir","","",""};
+String field_text[] = {"judul","nama","","",""};
+String field_id[] = {"id_buku","id_kasir","","",""};
+String table_name = "penjualan";
+int field_num = sizeof(field)/sizeof(field[0]);
+String button_name = "simpan_data_penjualan";
+
+renderInput(Sender,label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::SemuaData1Click(TObject *Sender)
+{
+String field[] = {"id_distributor","id_buku","jumlah","tanggal"};
+String label[] = {"Distributor","Buku","Jumlah","Tanggal"};
+String type[] = {"select","select","input","input"};
+String value[] = {"distributor","buku","",""};
+String field_text[] = {"nama_distributor","judul","",""};
+String field_id[] = {"id_distributor","id_buku","",""};
+String table_name = "pasok";
+int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_pembelian";
+
+        showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::SemuaData2Click(TObject *Sender)
+{
+String field[] = {"id_buku","id_kasir","jumlah","total","tanggal"};
+String label[] = {"Buku","Kasir","Jumlah","Total","Tanggal"};
+String type[] = {"select","select","input","input","input"};
+String value[] = {"buku","kasir","","",""};
+String field_text[] = {"judul","nama","","",""};
+String field_id[] = {"id_buku","id_kasir","","",""};
+String table_name = "penjualan";
+int field_num = sizeof(field)/sizeof(field[0]);
+		String button_name = "hapus_data_penjualan";
+
+		showGrid(label,type,value,field,field_text,field_id,table_name,field_num,button_name);
+}
+//---------------------------------------------------------------------------
